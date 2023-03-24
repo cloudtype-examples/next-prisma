@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next",
     "build": "prisma generate && prisma migrate deploy && prisma db seed && next build",
-    "start": "npm run build && concurrently \"next start\" \"npx prisma studio\"",
+    "start": "concurrently \"next start\" \"npx prisma studio\"",
     "studio": "npx prisma studio"
   },
   "dependencies": {
