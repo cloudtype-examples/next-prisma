@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "next",
     "build": "prisma generate && prisma migrate deploy && next build",
-    "start": "next start"
+    "start": "concurrently \"next start\" \"npx prisma studio\"",
+    "studio": "npx prisma studio"
   },
   "dependencies": {
     "@prisma/client": "4.7.1",
@@ -19,6 +20,7 @@
     "react-markdown": "^8.0.0"
   },
   "devDependencies": {
+    "concurrently": "^7.6.0",
     "prisma": "4.7.1"
   },
   "prisma": {
