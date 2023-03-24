@@ -1,5 +1,5 @@
 {
-  "name": "hello-next",
+  "name": "next-prisma",
   "version": "1.0.0",
   "description": "",
   "keywords": [],
@@ -13,7 +13,7 @@
     "studio": "npx prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "4.7.1",
+    "@prisma/client": "^4.11.0",
     "next": "^13.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "concurrently": "^7.6.0",
-    "prisma": "4.7.1"
+    "prisma": "^4.11.0"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
