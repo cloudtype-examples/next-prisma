@@ -1,300 +1,82 @@
-# Fullstack Example with Next.js (REST API)
-
-This example shows how to implement a **fullstack app with [Next.js](https://nextjs.org/)** using [React](https://reactjs.org/) (frontend), [Express](https://expressjs.com/) and [Prisma Client](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client) (backend). It uses a SQLite database file with some initial dummy data which you can find at [`./prisma/dev.db`](./prisma/dev.db).
-
-## Getting started
-
-### 1. Download example and install dependencies
-
-Download this example:
-
-```
-npx try-prisma --template javascript/rest-nextjs
-```
-
-Install npm dependencies:
-```
-cd rest-nextjs
-npm install
-```
-
-<details><summary><strong>Alternative:</strong> Clone the entire repo</summary>
-
-Clone this repository:
-
-```
-git clone git@github.com:prisma/prisma-examples.git --depth=1
-```
-
-Install npm dependencies:
-
-```
-cd prisma-examples/javascript/rest-nextjs
-npm install
-```
-
-</details>
-
-### 2. Create and seed the database
-
-Run the following command to create your SQLite database file. This also creates the `User` and `Post` tables that are defined in [`prisma/schema.prisma`](./prisma/schema.prisma):
-
-```
-npx prisma migrate dev --name init
-```
-
-When `npx prisma migrate dev` is executed against a newly created database, seeding is also triggered.  The seed file in [`prisma/seed.js`](./prisma/seed.js) will be executed and your database will be populated with the sample data.
-
-
-### 3. Start the app
-
-```
-npm run dev
-```
-
-The app is now running, navigate to [`http://localhost:3000/`](http://localhost:3000/) in your browser to explore its UI.
-
-<details><summary>Expand for a tour through the UI of the app</summary>
-
-<br />
-
-**Blog** (located in [`./pages/index.tsx`](./pages/index.tsx))
-
-![](https://imgur.com/eepbOUO.png)
-
-**Signup** (located in [`./pages/signup.tsx`](./pages/signup.tsx))
-
-![](https://imgur.com/iE6OaBI.png)
-
-**Create post (draft)** (located in [`./pages/create.tsx`](./pages/create.tsx))
-
-![](https://imgur.com/olCWRNv.png)
-
-**Drafts** (located in [`./pages/drafts.tsx`](./pages/drafts.tsx))
-
-![](https://imgur.com/PSMzhcd.png)
-
-**View post** (located in [`./pages/p/[id].tsx`](./pages/p/[id].tsx)) (delete or publish here)
-
-![](https://imgur.com/zS1B11O.png)
-
-</details>
-
-## Using the REST API
-
-You can also access the REST API of the API server directly. It is running on the same host machine and port and can be accessed via the `/api` route (in this case that is `localhost:3000/api/`, so you can e.g. reach the API with [`localhost:3000/api/feed`](http://localhost:3000/api/feed)).
-
-### `GET`
-
-- `/api/feed`: Fetch all _published_ posts
-- `/api/filterPosts?searchString={searchString}`: Filter posts by `title` or `content`
-
-### `POST`
-
-- `/api/post`: Create a new post
-  - Body:
-    - `title: String` (required): The title of the post
-    - `content: String` (optional): The content of the post
-    - `authorEmail: String` (required): The email of the user that creates the post
-- `/api/user`: Create a new user
-  - Body:
-    - `email: String` (required): The email address of the user
-    - `name: String` (optional): The name of the user
-
-### `PUT`
-
-- `/api/publish/:id`: Publish a post by its `id`
-
-### `DELETE`
-
-- `/api/post/:id`: Delete a post by its `id`
-
-## Switch to another database (e.g. PostgreSQL, MySQL, SQL Server, MongoDB)
-
-If you want to try this example with another database than SQLite, you can adjust the the database connection in [`prisma/schema.prisma`](./prisma/schema.prisma) by reconfiguring the `datasource` block. 
-
-Learn more about the different connection configurations in the [docs](https://www.prisma.io/docs/reference/database-reference/connection-urls).
-
-<details><summary>Expand for an overview of example configurations with different databases</summary>
-
-### PostgreSQL
-
-For PostgreSQL, the connection URL has the following structure:
-
-```prisma
-datasource db {
-  provider = "postgresql"
-  url      = "postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=SCHEMA"
-}
-```
-
-Here is an example connection string with a local PostgreSQL database:
-
-```prisma
-datasource db {
-  provider = "postgresql"
-  url      = "postgresql://janedoe:mypassword@localhost:5432/notesapi?schema=public"
-}
-```
-
-### MySQL
-
-For MySQL, the connection URL has the following structure:
-
-```prisma
-datasource db {
-  provider = "mysql"
-  url      = "mysql://USER:PASSWORD@HOST:PORT/DATABASE"
-}
-```
-
-Here is an example connection string with a local MySQL database:
-
-```prisma
-datasource db {
-  provider = "mysql"
-  url      = "mysql://janedoe:mypassword@localhost:3306/notesapi"
-}
-```
-
-### Microsoft SQL Server
-
-Here is an example connection string with a local Microsoft SQL Server database:
-
-```prisma
-datasource db {
-  provider = "sqlserver"
-  url      = "sqlserver://localhost:1433;initial catalog=sample;user=sa;password=mypassword;"
-}
-```
-
-### MongoDB
-
-Here is an example connection string with a local MongoDB database:
-
-```prisma
-datasource db {
-  provider = "mongodb"
-  url      = "mongodb://USERNAME:PASSWORD@HOST/DATABASE?authSource=admin&retryWrites=true&w=majority"
-}
-```
-Because MongoDB is currently in [Preview](https://www.prisma.io/docs/about/releases#preview), you need to specify the `previewFeatures` on your `generator` block:
-
-```
-generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["mongodb"]
-}
-```
-</details>
-
-## Evolving the app
-
-Evolving the application typically requires three steps:
-
-1. Migrate your database using Prisma Migrate
-1. Update your server-side application code
-1. Build new UI features in React
-
-For the following example scenario, assume you want to add a "profile" feature to the app where users can create a profile and write a short bio about themselves.
-
-### 1. Migrate your database using Prisma Migrate
-
-The first step is to add a new table, e.g. called `Profile`, to the database. You can do this by adding a new model to your [Prisma schema file](./prisma/schema.prisma) file and then running a migration afterwards:
-
-```diff
-// schema.prisma
-
-model Post {
-  id        Int     @default(autoincrement()) @id
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author    User?   @relation(fields: [authorId], references: [id])
-  authorId  Int
-}
-
-model User {
-  id      Int      @default(autoincrement()) @id 
-  name    String? 
-  email   String   @unique
-  posts   Post[]
-+ profile Profile?
-}
-
-+model Profile {
-+  id     Int     @default(autoincrement()) @id
-+  bio    String?
-+  userId Int     @unique
-+  user   User    @relation(fields: [userId], references: [id])
-+}
-```
-
-Once you've updated your data model, you can execute the changes against your database with the following command:
-
-```
-npx prisma migrate dev
-```
-
-### 2. Update your application code
-
-You can now use your `PrismaClient` instance to perform operations against the new `Profile` table. Here are some examples:
-
-#### Create a new profile for an existing user
-
-```ts
-const profile = await prisma.profile.create({
-  data: {
-    bio: "Hello World",
-    user: {
-      connect: { email: "alice@prisma.io" },
+<br/>
+<br/>
+
+<p align="center">
+<img src="https://files.cloudtype.io/logo/cloudtype-logo-horizontal-black.png" width="50%" alt="Cloudtype"/>
+</p>
+
+<br/>
+<br/>
+
+# Prisma(Next.js)
+
+Next.js 기반에 Prisma ORM을 적용한 템플릿입니다.
+## 🖇️ 준비 및 확인사항
+
+### 지원 Node 버전
+- Prisma는 최소 14.17.0 버전의 Node를 필요로 합니다.
+- Next.js는 최소 14.6.0 버전의 Node를 필요로 합니다.
+- ⚠️ 로컬/테스트 환경과 클라우드타입에서 설정한 Node 버전이 상이한 경우 정상적으로 빌드되지 않을 수 있습니다.
+
+
+### 빌드인자 및 환경변수 설정
+Next.js 어플리케이션을 배포하는 경우 빌드 시점에 외부의 값을 주입하는 것과 런타임 시점에 값을 참조하는 경우를 구분하여 빌드인자 혹은 환경변수를 세팅해야 합니다.
+- 빌드인자(Build Arguments): 빌드 시 인자의 값이 주입
+- 환경변수(Environment Variables): 런타임 시점에 값을 참조
+
+
+### 필요 파일
+- Prisma를 어플리케이션과 연동하여 클라우드타입에 배포하기 위해서는 package.json 의 npm script가 알맞게 작성되어 있어야 합니다. Prisma의 경우 데이터베이스 스키마 마이그레이션이 어플리케이션 빌드 과정 중에 수행되기 때문에 올바르지 않은 Build 스크립트 작성 시 정상적으로 구동되지 않을 수 있으며, 배포 시 package.json에서 정의한 내용에 따라 Build Command 필드에 알맞은 값을 입력해주어야 어플리케이션이 정상적으로 동작합니다.
+- Prisma는 Prisma Studio 라는 툴을 통해 데이터베이스의 데이터를 조회 및 조작할 수 있는 기능을 제공하고 있습니다. 이 기능을 사용하시려면 어플리케이션이 배포되는 포트 뿐만 아니라 Prisma Studio가 서비스되는 5555 포트를 배포 시에 반드시 추가해주어야 합니다. Next.js 어플리케이션과 Prisma Studio를 동시에 서비스 하기 위해 예제에서는 npm 패키지인 concurrently 가 사용되었습니다.
+
+
+  ```json
+  {
+    "name": "next-prisma",
+    "version": "1.0.0",
+    "description": "",
+    "keywords": [],
+    "license": "MIT",
+    "author": "",
+    "main": "index.js",
+    "scripts": {
+      "dev": "next",
+      "build": "prisma generate && prisma migrate deploy && prisma db seed && next build",
+      "start": "concurrently \"next start\" \"npx prisma studio\"",
+      "studio": "npx prisma studio"
     },
-  },
-});
-```
-
-#### Create a new user with a new profile
-
-```ts
-const user = await prisma.user.create({
-  data: {
-    email: "john@prisma.io",
-    name: "John",
-    profile: {
-      create: {
-        bio: "Hello World",
-      },
+    "dependencies": {
+      "@prisma/client": "^4.11.0",
+      "next": "^13.0.0",
+      "react": "^18.0.0",
+      "react-dom": "^18.0.0",
+      "react-markdown": "^8.0.0"
     },
-  },
-});
-```
-
-#### Update the profile of an existing user
-
-```ts
-const userWithUpdatedProfile = await prisma.user.update({
-  where: { email: "alice@prisma.io" },
-  data: {
-    profile: {
-      update: {
-        bio: "Hello Friends",
-      },
+    "devDependencies": {
+      "concurrently": "^7.6.0",
+      "prisma": "^4.11.0"
     },
-  },
-});
-```
+    "prisma": {
+      "seed": "node prisma/seed.js"
+    }
+  }
+  ```
 
 
-### 3. Build new UI features in React
 
-Once you have added a new endpoint to the API (e.g. `/api/profile` with `/POST`, `/PUT` and `GET` operations), you can start building a new UI component in React. It could e.g. be called `profile.tsx` and would be located in the `pages` directory.
+## 💬 문제해결
 
-In the application code, you can access the new endpoint via `fetch` operations and populate the UI with the data you receive from the API calls.
+- [클라우드타입 Docs](https://docs.cloudtype.io/)
+
+- [클라우드타입 FAQ](https://help.cloudtype.io/guide/faq)
+
+- [Discord](https://discord.gg/U7HX4BA6hu)
 
 
-## Next steps
+## 📄 License
 
-- Check out the [Prisma docs](https://www.prisma.io/docs)
-- Share your feedback in the [`prisma2`](https://prisma.slack.com/messages/CKQTGR6T0/) channel on the [Prisma Slack](https://slack.prisma.io/)
-- Create issues and ask questions on [GitHub](https://github.com/prisma/prisma/)
+### Prisma
+- [Apache 2.0](https://github.com/prisma/prisma/blob/main/LICENSE)
 
+### Next.js
+- [MIT](https://github.com/vercel/next.js/blob/canary/license.md)
